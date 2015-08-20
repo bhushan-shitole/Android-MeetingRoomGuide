@@ -1,4 +1,4 @@
-package com.example.synerzip.helloworld;
+package com.example.synerzip.meetingRoomGuide;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

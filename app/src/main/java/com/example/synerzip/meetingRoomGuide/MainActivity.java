@@ -1,4 +1,4 @@
-package com.example.synerzip.helloworld;
+package com.example.synerzip.meetingRoomGuide;
 
 import android.app.ListActivity;
 import android.app.WallpaperManager;
@@ -77,6 +77,10 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
         Drawable currentWallPaper = wallpaperManager.getDrawable();
         mainRelativeLayout.setBackground(currentWallPaper);
+
+        BroadCastBackgroundImage broadCastImage = new BroadCastBackgroundImage("changeImage");
+        broadCastImage.postImage();
+
 //        mainRelativeLayout.setBackgroundColor(getResources().getColor(R.color.highlighted_text_material_light));
 
         /********** Display all calendar names in drop down START ****************/
@@ -307,6 +311,10 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
 
             long compare = Integer.valueOf(calInstanceMeetingEventStart.get(Calendar.HOUR_OF_DAY)).compareTo(calInstanceCurrent.get(Calendar.HOUR_OF_DAY));
 
+            if(compare == 0)//Means Both meeting time in hours is same hence compare minutes
+            {
+                compare = Integer.valueOf(calInstanceMeetingEventStart.get(Calendar.MINUTE)).compareTo(calInstanceCurrent.get(Calendar.MINUTE));
+            }
 
             if ((compare == 1 && currentEventFoundFlag == false) || (currentEventFoundFlag == true && previousTitle == chapter.title))// no meeting event is highlighted
             {
@@ -351,8 +359,14 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
             // Fetch all events of selected calendar
             Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
             long now = new Date().getTime();
+
+
+            Calendar calInstanceE = Calendar.getInstance(); // creates calendar
+            calInstanceE.setTime(new Date(now));
+            long currentHourOfDay = calInstanceE.get(Calendar.HOUR_OF_DAY);
+
             ContentUris.appendId(builder, now);
-            ContentUris.appendId(builder, now + DateUtils.DAY_IN_MILLIS);
+            ContentUris.appendId(builder, (now + (24 - currentHourOfDay) * DateUtils.HOUR_IN_MILLIS));
 
             final String[] projection = new String[]
                     {CalendarContract.Events.TITLE, CalendarContract.Events.DTSTART,

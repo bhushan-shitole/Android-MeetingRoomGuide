@@ -1,4 +1,4 @@
-package com.example.synerzip.helloworld;
+package com.example.synerzip.meetingRoomGuide;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

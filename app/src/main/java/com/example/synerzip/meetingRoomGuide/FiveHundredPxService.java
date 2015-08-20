@@ -14,8 +14,28 @@
  * limitations under the License.
  */
 
-package com.example.synerzip.helloworld;
+package com.example.synerzip.meetingRoomGuide;
 
-public interface Config {
-    public static final String CONSUMER_KEY = "HocY5wY9GQaa9sdNO9HvagCGuGt34snyMTHckIQJ";
+import java.util.List;
+
+import retrofit.http.GET;
+
+interface FiveHundredPxService {
+    @GET("/v1/photos?feature=Nature&sort=rating&image_size=5&rpp=40")
+    PhotosResponse getPopularPhotos();
+
+    static class PhotosResponse {
+        List<Photo> photos;
+    }
+
+    static class Photo {
+        int id;
+        String image_url;
+        String name;
+        User user;
+    }
+
+    static class User {
+        String fullname;
+    }
 }

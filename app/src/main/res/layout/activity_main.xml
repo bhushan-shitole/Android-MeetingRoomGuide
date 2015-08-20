@@ -36,8 +36,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/spinner"
-        android:textStyle="bold"
-        android:textSize="20sp"
         style="@android:style/Widget.Spinner.DropDown"
         android:layout_below="@android:id/list"
         android:layout_alignEnd="@android:id/list"

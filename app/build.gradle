@@ -4,7 +4,7 @@ android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
     defaultConfig {
-        applicationId "com.example.synerzip.helloworld"
+        applicationId "com.example.synerzip.meetingRoomGuide"
         minSdkVersion 19
         targetSdkVersion 22
         versionCode 1

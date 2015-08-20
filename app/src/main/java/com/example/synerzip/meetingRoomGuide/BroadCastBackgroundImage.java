@@ -1,8 +1,7 @@
-package com.example.synerzip.helloworld;
+package com.example.synerzip.meetingRoomGuide;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 
 import de.greenrobot.event.EventBus;
 

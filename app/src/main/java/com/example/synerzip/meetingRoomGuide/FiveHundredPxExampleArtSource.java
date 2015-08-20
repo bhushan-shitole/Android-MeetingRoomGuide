@@ -1,12 +1,9 @@
-package com.example.synerzip.helloworld;
+package com.example.synerzip.meetingRoomGuide;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.android.apps.muzei.api.Artwork;
 import com.google.android.apps.muzei.api.RemoteMuzeiArtSource;
 
 import java.io.IOException;
