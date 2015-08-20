@@ -21,7 +21,7 @@ import java.util.List;
 import retrofit.http.GET;
 
 interface FiveHundredPxService {
-    @GET("/v1/photos?feature=popular&sort=rating&image_size=5&rpp=40")
+    @GET("/v1/photos?feature=Nature&sort=rating&image_size=5&rpp=40")
     PhotosResponse getPopularPhotos();
 
     static class PhotosResponse {

@@ -2,21 +2,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/material_deep_teal_200"
     android:id="@+id/mainRelativeLayout"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <ListView
         android:id="@android:id/list"
         android:layout_width="550dp"
         android:layout_height="350dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
         android:layout_marginRight="50dp"
         android:divider="@drawable/abc_list_divider_mtrl_alpha"
         android:dividerHeight="1dp"
-        android:background="@drawable/shape"
-        android:fastScrollStyle="@color/primary_dark_material_dark">
+        android:background="@color/highlighted_text_material_dark"
+        android:outlineProvider="bounds"
+        android:fastScrollStyle="@color/primary_dark_material_dark"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true">
     </ListView>
 
 
@@ -24,29 +24,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:id="@+id/username"
+        android:id="@+id/calendarName"
         android:textStyle="bold"
         android:textColor="@color/abc_primary_text_disable_only_material_dark"
-        android:layout_alignParentTop="true"
-        android:layout_alignRight="@android:id/list"
-        android:layout_alignEnd="@android:id/list"
-        android:layout_marginTop="50dp"
-        android:textSize="20sp"
-        android:layout_marginRight="50dp" />
+        android:textSize="30sp"
+        android:layout_marginRight="50dp"
+        android:layout_alignEnd="@+id/changeImage"
+        android:layout_marginTop="50dp" />
 
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/spinner"
-        android:layout_below="@android:id/list"
-        android:layout_marginTop="50dp"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:layout_alignLeft="@android:id/list"
-        android:layout_alignRight="@android:id/list"
-        android:layout_alignStart="@android:id/list"
-        android:transitionGroup="false"
-        android:touchscreenBlocksFocus="false"
-        style="@android:style/Widget.Spinner.DropDown" />
+        style="@android:style/Widget.Spinner.DropDown"
+        android:layout_below="@android:id/list"
+        android:layout_alignEnd="@android:id/list"
+        android:layout_alignStart="@android:id/list" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change Background"
+        android:id="@+id/changeImage"
+        android:layout_below="@+id/spinner"
+        android:layout_alignEnd="@+id/spinner" />
 
 </RelativeLayout>

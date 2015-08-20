@@ -2,14 +2,11 @@ package com.example.synerzip.helloworld;
 
 import android.graphics.Bitmap;
 
-import de.greenrobot.event.EventBus;
+public class BackgroundImage {
 
-public class ImageReceiver {
-
-    private EventBus bus = EventBus.getDefault();
     private Bitmap image;
 
-    public ImageReceiver(Bitmap NewImage) {
+    public BackgroundImage(Bitmap NewImage) {
         this.image = NewImage;
     }
 

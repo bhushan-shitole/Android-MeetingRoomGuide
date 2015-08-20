@@ -1,30 +1,27 @@
 package com.example.synerzip.helloworld;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 
 import de.greenrobot.event.EventBus;
 
-public class BroadCastImage extends BroadcastReceiver {
-
+public class BroadCastBackgroundImage {
     private EventBus bus = EventBus.getDefault();
-    private Bitmap image;
+    private String image;
 
-    public BroadCastImage(Bitmap NewImage) {
+    public BroadCastBackgroundImage(String NewImage) {
         this.image = NewImage;
     }
 
-    public BroadCastImage() {
+    public BroadCastBackgroundImage() {
 
     }
 
-    @Override
     public void onReceive(Context context, Intent intent) {
         // Post the event
         if (this.image != null) {
-            BackgroundImage backgroundImage = new BackgroundImage(this.image);
+            BackgroundImageOnClick backgroundImage = new BackgroundImageOnClick(this.image);
             bus.post(backgroundImage);
             System.out.println("Receiving image not null");
         }
@@ -32,9 +29,9 @@ public class BroadCastImage extends BroadcastReceiver {
     }
 
     public void postImage() {
-        BackgroundImage backgroundImage = new BackgroundImage(this.image);
+        BackgroundImageOnClick backgroundImage = new BackgroundImageOnClick(this.image);
         bus.post(backgroundImage);
-        System.out.println("posting image");
+        System.out.println("posting changed image");
 
     }
 }
