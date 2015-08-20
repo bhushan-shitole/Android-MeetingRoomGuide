@@ -2,24 +2,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/material_deep_teal_200"
+    android:id="@+id/mainRelativeLayout"
+    android:background="@drawable/ic_source"
     android:orientation="vertical" >
 
     <ListView
         android:id="@android:id/list"
-        android:layout_width="350dp"
+        android:layout_width="550dp"
         android:layout_height="350dp"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="false"
-        android:layout_marginRight="50dp">
+        android:layout_marginRight="50dp"
+        android:divider="@drawable/abc_list_divider_mtrl_alpha"
+        android:dividerHeight="1dp"
+        android:background="@drawable/shape"
+        android:fastScrollStyle="@color/primary_dark_material_dark">
     </ListView>
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
         android:id="@+id/username"
         android:textStyle="bold"
         android:textColor="@color/abc_primary_text_disable_only_material_dark"
@@ -42,6 +46,7 @@
         android:layout_alignRight="@android:id/list"
         android:layout_alignStart="@android:id/list"
         android:transitionGroup="false"
-        android:touchscreenBlocksFocus="false" />
+        android:touchscreenBlocksFocus="false"
+        style="@android:style/Widget.Spinner.DropDown" />
 
 </RelativeLayout>

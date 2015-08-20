@@ -1,217 +1,185 @@
 package com.example.synerzip.helloworld;
 
-import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.CalendarContract;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.view.View;
-import android.app.Activity;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Comparator;
-import java.util.Objects;
-
-import android.accounts.Account;
-import android.accounts.AccountManager;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.AdapterView;
 
+import de.greenrobot.event.EventBus;
+
 public class MainActivity extends ListActivity implements OnItemSelectedListener {
 
     public class CalendarList {
-        Integer id;
         String username;
         String title;
         Date start;
         Date end;
     }
 
+    private Boolean isRegister = false;
+    View mainRelativeLayout;
+    Bitmap bkgImage;
+
     CalendarListAdapter calendarListAdapter;
 
     List<CalendarList> calendarEventList;
 
-    // static data
-    List<CalendarList> calendarStaticSillyPointData = new ArrayList<CalendarList>();
-    List<CalendarList> calendarStaticLongOnData = new ArrayList<CalendarList>();
-    List<CalendarList> calendarStaticMidOffData = new ArrayList<CalendarList>();
-    List<CalendarList> calendarStaticExtraCoverData = new ArrayList<CalendarList>();
-    List<CalendarList> calendarStaticLongOffData = new ArrayList<CalendarList>();
-    List<CalendarList> calendarStaticSecondSlipData = new ArrayList<CalendarList>();
-
-    private static final String DATE_TIME_FORMAT = "dd, HH:mm";
+    private static final String DATE_TIME_FORMAT = "h:mm a";
 
     ListView listView ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.codelearn_list_home);
+        setContentView(R.layout.activity_main);
 
-        TextView accountName = (TextView)findViewById(R.id.username);
-        accountName.setText(getAccountName(this));
+        // Register as a subscriber
+        EventBus.getDefault().register(this);
+        isRegister = true;
 
-        /************ static data start **************/
+        // cache current relative layout
+        mainRelativeLayout = findViewById(R.id.mainRelativeLayout);
 
+        /********** Display all calendar names in drop down START ****************/
+        ArrayList <String> calendarNames = new ArrayList<String>();
+        ContentResolver contentResolver = this.getContentResolver();
+        Cursor cursor = contentResolver.query(Uri.parse("content://com.android.calendar/calendars"),
+                (new String[]{"_id", "calendar_displayName", "visible"}), null, null, "_id ASC");
 
-
-        for(int i = 0; i< 5; i++) {
-            CalendarList record = new CalendarList();
-            record.id = i;
-            record.title = "SillyPoint event" + i;
-            record.start = new Date();
-            record.end = new Date();
-            record.username = "SillyPoint";
-
-            calendarStaticSillyPointData.add(record);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                final String _id = cursor.getString(0);
+                final String displayName = cursor.getString(1);
+                calendarNames.add(displayName);
+            }
+            cursor.close();
+            Collections.sort(calendarNames, CALENDAR_NAME_ORDER);
         }
-
-        for(int i = 0; i< 5; i++) {
-            CalendarList record = new CalendarList();
-            record.id = i;
-            record.title = "LongOn event" + i;
-            record.start = new Date();
-            record.end = new Date();
-            record.username = "LongOn";
-
-            calendarStaticLongOnData.add(record);
-        }
-
-        for(int i = 0; i< 5; i++) {
-            CalendarList record = new CalendarList();
-            record.id = i;
-            record.title = "MidOff event" + i;
-            record.start = new Date();
-            record.end = new Date();
-            record.username = "MidOff";
-
-            calendarStaticMidOffData.add(record);
-        }
-
-        for(int i = 0; i< 5; i++) {
-            CalendarList record = new CalendarList();
-            record.id = i;
-            record.title = "ExtraCover event" + i;
-            record.start = new Date();
-            record.end = new Date();
-            record.username = "ExtraCover";
-
-            calendarStaticExtraCoverData.add(record);
-        }
-
-        for(int i = 0; i< 5; i++) {
-            CalendarList record = new CalendarList();
-            record.id = i;
-            record.title = "LongOff event" + i;
-            record.start = new Date();
-            record.end = new Date();
-            record.username = "LongOff";
-
-            calendarStaticLongOffData.add(record);
-        }
-
-        for(int i = 0; i< 5; i++) {
-            CalendarList record = new CalendarList();
-            record.id = i;
-            record.title = "SecondSlip event" + i;
-            record.start = new Date();
-            record.end = new Date();
-            record.username = "SecondSlip";
-
-            calendarStaticSecondSlipData.add(record);
-        }
-
-
-
-        /************* static data end **************/
-
-//        calendarEventList = getDataForListView(MainActivity.this);
-
-        calendarEventList = calendarStaticSillyPointData;
-        calendarListAdapter = new CalendarListAdapter();
-        setListAdapter(calendarListAdapter);
 
         // drop down adapter
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.users_array, android.R.layout.simple_spinner_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, calendarNames);
+
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
+
+        /********** Display all calendar names in drop down END ****************/
+
+        // set first calender's name at top right
+        TextView accountName = (TextView)findViewById(R.id.username);
+        accountName.setText(calendarNames.get(0));
+
+        // Display first calender's events in list view
+        calendarEventList = getDataForListView(MainActivity.this, calendarNames.get(0));
+        calendarListAdapter = new CalendarListAdapter();
+        setListAdapter(calendarListAdapter);
+
+
+    }
+
+    public void onEvent(ImageReceiver imageReceiver){
+        // set latest background image to current layout
+        bkgImage = imageReceiver.getImage();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Drawable dr = new BitmapDrawable(getResources(), bkgImage);
+                mainRelativeLayout.setBackground(dr);
+            }
+        });
+        System.out.println("Inside onEvent");
+    }
+
+    protected void onDestroy() {
+        // Unregister
+        super.onDestroy();
+        if (isRegister) {
+            EventBus.getDefault().unregister(this);
+            isRegister = false;
+        }
+        System.out.println("Inside destroy");
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        if (!isRegister) {
+            EventBus.getDefault().register(this);
+        }
+        System.out.println("Inside start");
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        if (isRegister) {
+            EventBus.getDefault().unregister(this);
+            isRegister = false;
+        }
+        System.out.println("Inside stop");
     }
 
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
         // An item was selected. You can retrieve the selected item using
-         String username = (String) parent.getItemAtPosition(pos);
+         String selectedCalendarName = (String) parent.getItemAtPosition(pos);
 
-        switch (username) {
-            case "SillyPoint": calendarEventList = calendarStaticSillyPointData;
-                            break;
-            case "LongOn": calendarEventList = calendarStaticLongOnData;
-                break;
+        // Display selected calendar name in top right
+        TextView calendarName = (TextView)findViewById(R.id.username);
+        calendarName.setText(selectedCalendarName);
 
-            case "MidOff": calendarEventList = calendarStaticMidOffData;
-                break;
-
-            case "ExtraCover": calendarEventList = calendarStaticExtraCoverData;
-                break;
-
-            case "LongOff": calendarEventList = calendarStaticLongOffData;
-                break;
-            case "SecondSlip": calendarEventList = calendarStaticSecondSlipData;
-                break;
-            default:     calendarEventList = calendarStaticSillyPointData;
-
-        }
-
-//        calendarEventList = calendarStaticSillyPointData;
+        // Fetch and display selected calendar's events in list view
+        calendarEventList = getDataForListView(MainActivity.this, selectedCalendarName);
         calendarListAdapter = new CalendarListAdapter();
         setListAdapter(calendarListAdapter);
-
-
-//        calendarStaticData
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
         // Another interface callback
     }
-
-
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-
-        CalendarList chapter = calendarListAdapter.getCalendarEvent(position);
-
-        Toast.makeText(MainActivity.this, chapter.title, Toast.LENGTH_LONG).show();
+//        CalendarList chapter = calendarListAdapter.getCalendarEvent(position);
+//        Toast.makeText(MainActivity.this, chapter.title, Toast.LENGTH_LONG).show();
     }
+
     public class CalendarListAdapter extends BaseAdapter {
 
         @Override
@@ -244,19 +212,31 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
             TextView title = (TextView)arg1.findViewById(R.id.title);
             TextView startDate = (TextView)arg1.findViewById(R.id.start);
             TextView endDate = (TextView)arg1.findViewById(R.id.end);
+            TextView duration = (TextView)arg1.findViewById(R.id.to);
 
             CalendarList chapter = calendarEventList.get(arg0);
 
-            String Day = new SimpleDateFormat("yyyy MMM dd").format(chapter.start);
-            String today = new SimpleDateFormat("yyyy MMM dd").format(new Date());
+            String Day = new SimpleDateFormat("dd").format(chapter.start);
+            String today = new SimpleDateFormat("dd").format(new Date());
+            long now = new Date().getTime();
 
-//            if (Day.contentEquals(today)){
-//                System.out.println("bhushan : " + new Date().toString());
-//                title.setBackgroundColor(Color.BLUE);
-//                chapterDesc.setBackgroundColor(Color.BLUE);
-//            }
+            title.setTextColor(Color.BLACK);
+            startDate.setTextColor(Color.BLACK);
+            endDate.setTextColor(Color.BLACK);
+            duration.setTextColor(Color.BLACK);
+            arg1.setBackgroundColor(Color.TRANSPARENT);
 
+            // Show current event's text white
+            if (DateUtils.isToday(chapter.start.getTime())) {
+                if ((chapter.start.getTime() < now) && (chapter.end.getTime() > now)) {
+                    title.setTextColor(Color.WHITE);
+                    startDate.setTextColor(Color.WHITE);
+                    endDate.setTextColor(Color.WHITE);
+                    duration.setTextColor(Color.WHITE);
 
+                    arg1.setBackgroundColor(arg1.getResources().getColor(R.color.material_deep_teal_500));
+                }
+            }
 
             title.setText(chapter.title);
             startDate.setText(new SimpleDateFormat(DATE_TIME_FORMAT).format(chapter.start));
@@ -279,12 +259,12 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         return true;
     }
 
-    public List<CalendarList> getDataForListView(MainActivity context) {
-        List calendarList = readCalendar(context);
+    public List<CalendarList> getDataForListView(MainActivity context, String username) {
+        List calendarList = readCalendar(context, username);
         return calendarList;
     }
 
-    public List readCalendar(Context context) {
+    public List readCalendar(Context context, String username) {
 
         ContentResolver contentResolver = context.getContentResolver();
         List<CalendarList> calendarData = new ArrayList<CalendarList>();
@@ -292,63 +272,61 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         Cursor cursor = null;
 
         try {
-            // Fetch a list of all calendars synced with the device, their display names and whether the
-            // user has them selected for display.
-
-            cursor = contentResolver.query(Uri.parse("content://com.android.calendar/calendars"),
-                    (new String[]{"_id", "calendar_displayName", "visible"}), null, null, "_id ASC");
-
-            HashSet<String> calendarIds = new HashSet<String>();
-
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-
-                    final String _id = cursor.getString(0);
-                    final String displayName = cursor.getString(1);
-                    final Boolean selected = !cursor.getString(2).equals("0");
-
-                    System.out.println("Id: " + _id + " Display Name: " + displayName + " Selected: " + selected);
-                    calendarIds.add(_id);
-                }
-            }
-
-            // For each calendar, display all the events from the previous week to the end of next week.
-            for (String id : calendarIds) {
-
                 Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
                 long now = new Date().getTime();
-                ContentUris.appendId(builder, now - DateUtils.WEEK_IN_MILLIS);
-                ContentUris.appendId(builder, now + DateUtils.WEEK_IN_MILLIS);
+                ContentUris.appendId(builder, now);
+                ContentUris.appendId(builder, now + DateUtils.DAY_IN_MILLIS);
 
                 final String[] projection = new String[]
-                        {CalendarContract.Events.TITLE, CalendarContract.Events.DTSTART, CalendarContract.Events.DTEND, CalendarContract.Events.ACCOUNT_NAME};
+                        {CalendarContract.Events.TITLE, CalendarContract.Events.DTSTART,
+                         CalendarContract.Events.DTEND, CalendarContract.Events.ACCOUNT_NAME, CalendarContract.Events.CALENDAR_TIME_ZONE};
 
                 eventCursor = contentResolver.query(
-                        builder.build(), projection, CalendarContract.Instances.CALENDAR_ID + " = ?",
-                        new String[]{"" + id}, "CALENDAR_ID ASC");
+                        builder.build(), projection, CalendarContract.Instances.CALENDAR_DISPLAY_NAME + " = ?",
+                        new String[]{"" + username}, "DTSTART ASC");
 
-                eventCursor.moveToFirst();
+            eventCursor.moveToFirst();
+            do {
+                CalendarList record = new CalendarList();
 
-                while (eventCursor.moveToNext()) {
-                    CalendarList record = new CalendarList();
+                final String title = eventCursor.getString(0);
+                final Date begin = new Date(eventCursor.getLong(1));
+//                final Date end = new Date(eventCursor.getLong(2));
+                final String accountName = eventCursor.getString(3);
+                final String duration = eventCursor.getString(4);
 
-                    final String title = eventCursor.getString(0);
-                    final Date begin = new Date(eventCursor.getLong(1));
-                    final Date end = new Date(eventCursor.getLong(2));
-                    final String accountName = eventCursor.getString(3);
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeZone(TimeZone.getTimeZone("Asia/Calcutta"));
+                cal.setTimeInMillis(eventCursor.getLong(2));
 
-                    System.out.println("Title: " + title + " Begin: " + begin + " End: " + end +
-                            " accountName: " + accountName);
+                final Date end = cal.getTime();
 
-                    record.id = Integer.parseInt(id);
-                    record.title = title;
-                    record.start = begin;
-                    record.end = end;
-                    record.username = accountName;
+//                SimpleDateFormat endFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
+//                TimeZone tzInAmerica = TimeZone.getTimeZone("Asia/Calcutta");
+//                endFormat.setTimeZone(tzInAmerica);
+//                endFormat.format(eventCursor.getLong(2));
 
-                    calendarData.add(record);
-                }
-            }
+
+
+//                long mTime = end.getTime();
+//                System.out.println("isToday: " + DateUtils.isToday(mTime));
+                System.out.println("day: " + cal.get(Calendar.DAY_OF_MONTH));
+                System.out.println("month: " + cal.get(Calendar.MONTH));
+                System.out.println("year: " + cal.get(Calendar.YEAR));
+                System.out.println("HR: " + cal.get(Calendar.HOUR));
+                System.out.println("Min: " + cal.get(Calendar.MINUTE));
+                System.out.println("CALENDAR_TIME_ZONE: " + cal.getTimeZone());
+
+                System.out.println("Title: " + title + " Begin: " + begin + " End: " + end +
+                        " accountName: " + accountName);
+
+                record.title = title;
+                record.start = begin;
+                record.end = end;
+                record.username = accountName;
+
+                calendarData.add(record);
+            } while (eventCursor.moveToNext());
 
             Collections.sort(calendarData, SENIORITY_ORDER);
 
@@ -372,28 +350,24 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
 
     static final Comparator<CalendarList> SENIORITY_ORDER = new Comparator<CalendarList>() {
         public int compare(CalendarList e1, CalendarList e2) {
-            return e1.start.compareTo(e2.start);
+            int compare = e1.start.compareTo(e2.start);
+            if (compare == 0) {
+                Calendar e1Start = Calendar.getInstance();
+                e1Start.setTime(e1.start);
+                Calendar e2Start = Calendar.getInstance();
+                e2Start.setTime(e2.start);
+                compare = Integer.valueOf(e1Start.get(Calendar.MINUTE)).compareTo(e1Start.get(Calendar.MINUTE));
+            }
+            return compare;
         }
     };
 
-    static String getAccountName(Context context) {
-        AccountManager accountManager = AccountManager.get(context);
-        Account account = getAccount(accountManager);
-        if (account == null) {
-            return null;
-        } else {
-            return account.name;
+    // sort calendar names alphabetically
+    static final Comparator<String> CALENDAR_NAME_ORDER = new Comparator<String>() {
+        public int compare(String e1, String e2) {
+            return  e1.compareToIgnoreCase(e2);
         }
-    }
-    private static Account getAccount(AccountManager accountManager) {
-        Account[] accounts = accountManager.getAccountsByType("com.google");
-        Account account;
-        if (accounts.length > 0) {
-            account = accounts[0];
-        } else {
-            account = null;
-        } return account;
-    }
+    };
 
 }
 

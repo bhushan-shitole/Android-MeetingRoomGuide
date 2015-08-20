@@ -1,15 +1,10 @@
 <resources>
-    <string name="app_name">Hello World</string>
+    <string name="app_name">Smart Meeting Room</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
-    <string-array name="users_array">
-        <item>SillyPoint</item>
-        <item>LongOn</item>
-        <item>MidOff</item>
-        <item>ExtraCover</item>
-        <item>LongOff</item>
-        <item>SecondSlip</item>
-    </string-array>
+    <string name="source_name">500px (Example)</string>
+    <string name="source_description">Popular photos from 500px</string>
+
 </resources>
