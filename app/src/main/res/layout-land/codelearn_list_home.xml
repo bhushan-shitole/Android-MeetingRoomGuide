@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/material_deep_teal_200"
+    android:orientation="vertical" >
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="false"
+        android:layout_marginRight="50dp">
+    </ListView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Medium Text"
+        android:id="@+id/username"
+        android:textStyle="bold"
+        android:textColor="@color/abc_primary_text_disable_only_material_dark"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@android:id/list"
+        android:layout_alignEnd="@android:id/list"
+        android:layout_marginTop="50dp"
+        android:textSize="20sp"
+        android:layout_marginRight="50dp" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner"
+        android:layout_below="@android:id/list"
+        android:layout_marginTop="50dp"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_alignLeft="@android:id/list"
+        android:layout_alignRight="@android:id/list"
+        android:layout_alignStart="@android:id/list"
+        android:transitionGroup="false"
+        android:touchscreenBlocksFocus="false" />
+
+</RelativeLayout>
