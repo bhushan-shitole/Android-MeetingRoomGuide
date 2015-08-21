@@ -29,7 +29,7 @@
         android:textColor="@color/abc_primary_text_disable_only_material_dark"
         android:textSize="30sp"
         android:layout_marginRight="50dp"
-        android:layout_alignEnd="@+id/changeImage"
+        android:layout_alignEnd="@android:id/list"
         android:layout_marginTop="50dp" />
 
     <Spinner
@@ -40,14 +40,5 @@
         android:layout_below="@android:id/list"
         android:layout_alignEnd="@android:id/list"
         android:layout_alignStart="@android:id/list" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Change Background"
-        android:id="@+id/changeImage"
-        android:layout_below="@+id/spinner"
-        android:layout_alignEnd="@+id/spinner" />
 
 </RelativeLayout>

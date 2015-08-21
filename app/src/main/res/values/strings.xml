@@ -4,7 +4,4 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
-    <string name="source_name">500px (Example)</string>
-    <string name="source_description">Popular photos from 500px</string>
-
 </resources>

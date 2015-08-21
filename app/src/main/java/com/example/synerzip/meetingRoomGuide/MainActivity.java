@@ -7,11 +7,13 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.CalendarContract;
 import android.os.Bundle;
 import android.text.format.DateUtils;
@@ -19,11 +21,17 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,13 +39,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Comparator;
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.AdapterView;
 
-import de.greenrobot.event.EventBus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends ListActivity implements OnItemSelectedListener {
     boolean currentEventFoundFlag = false;
@@ -52,23 +63,15 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
     }
 
     View mainRelativeLayout;
-    Bitmap bkgImage;
-
     CalendarListAdapter calendarListAdapter;
-
     List<CalendarList> calendarEventList;
-
     private static final String DATE_TIME_FORMAT = "h:mm a";
-
-    ListView listView;
+    Drawable newDrawable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Register as a subscriber
-        EventBus.getDefault().register(this);
 
         // cache current relative layout
         mainRelativeLayout = findViewById(R.id.mainRelativeLayout);
@@ -78,10 +81,9 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         Drawable currentWallPaper = wallpaperManager.getDrawable();
         mainRelativeLayout.setBackground(currentWallPaper);
 
-        BroadCastBackgroundImage broadCastImage = new BroadCastBackgroundImage("changeImage");
-        broadCastImage.postImage();
-
-//        mainRelativeLayout.setBackgroundColor(getResources().getColor(R.color.highlighted_text_material_light));
+        // Get Bing image and set as background every day
+        Timer timer = new Timer();
+        timer.schedule(new SetBingImageAsBackground(), 0, DateUtils.DAY_IN_MILLIS);
 
         /********** Display all calendar names in drop down START ****************/
         ArrayList<String> calendarNames = new ArrayList<String>();
@@ -94,13 +96,15 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
                 String displayName = cursor.getString(0);
 
                 // Filter primary account's calender
-                if (displayName.contains("@")) {
-                    continue;
-                }
+//                if (displayName.contains("@")) {
+//                    continue;
+//                }
                 calendarNames.add(displayName);
-                System.out.println("Calendar name: " + displayName);
             }
             cursor.close();
+
+            // To sort with case sensitive uncomment below
+//            Collections.sort(calendarNames, CALENDAR_NAME_ORDER);
         }
 
         // drop down adapter
@@ -108,12 +112,12 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, calendarNames){
+                android.R.layout.simple_spinner_item, calendarNames) {
 
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = super.getView(position, convertView, parent);
 
-                Typeface externalFont=Typeface.createFromAsset(getAssets(), "DroidSans.ttf");
+                Typeface externalFont = Typeface.createFromAsset(getAssets(), "DroidSans.ttf");
                 ((TextView) v).setTypeface(externalFont);
                 ((TextView) v).setTextSize(20);
 
@@ -121,10 +125,10 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
             }
 
 
-            public View getDropDownView(int position,  View convertView,  ViewGroup parent) {
-                View v =super.getDropDownView(position, convertView, parent);
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View v = super.getDropDownView(position, convertView, parent);
 
-                Typeface externalFont=Typeface.createFromAsset(getAssets(), "DroidSans.ttf");
+                Typeface externalFont = Typeface.createFromAsset(getAssets(), "DroidSans.ttf");
                 ((TextView) v).setTypeface(externalFont);
                 ((TextView) v).setTextSize(20);
 
@@ -149,57 +153,94 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         calendarEventList = getDataForListView(MainActivity.this, calendarNames.get(0));
         calendarListAdapter = new CalendarListAdapter();
         setListAdapter(calendarListAdapter);
-
-        Button changeImageBtn = (Button) findViewById(R.id.changeImage);
-        changeImageBtn.setTypeface(Typeface.createFromAsset(getAssets(),
-                "DroidSans.ttf"));
-
-        changeImageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println("Inside onclick button");
-                BroadCastBackgroundImage broadCastImage = new BroadCastBackgroundImage("changeImage");
-                broadCastImage.postImage();
-            }
-        });
     }
 
-    // This function is get called when data is posted through EventBus(callback method)
-    public void onEvent(BackgroundImage backgroundImage) {
-        // set latest background image to current layout
-        bkgImage = backgroundImage.getImage();
+    class SetBingImageAsBackground extends TimerTask {
+        public void run() {
+
+            // Link to get the Bing Image of the day in JSON format
+            String link = "http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1";
+            mainRelativeLayout = findViewById(R.id.mainRelativeLayout);
+            new SetBackgroundImageTask().execute(link);
+
+            System.out.println("Bing image updated");
+        }
+    }
+
+
+    public class SetBackgroundImageTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                URL url = new URL(params[0]);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                String result = convertStreamToString(input);
+                JSONObject jsonObj = new JSONObject(result);
+                String imageUrl = jsonObj.getJSONArray("images").getJSONObject(0).getString("url");
+                String finalLink = "http://www.bing.com" + imageUrl;
+
+                Bitmap bmp;
+                url = new URL(finalLink);
+                bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+                newDrawable = new BitmapDrawable(getResources(), bmp);
+
+                setCustomBackground();
+
+                System.out.println("Bing Image of the day: " + finalLink);
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        public String convertStreamToString(InputStream is) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+
+            String line = null;
+            try {
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append('\n');
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return sb.toString();
+        }
+    }
+
+    public void setCustomBackground() {
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Drawable dr = new BitmapDrawable(getResources(), bkgImage);
-                mainRelativeLayout.setBackground(dr);
+                System.out.println("inside setCustomBackground");
+                if (newDrawable != null) {
+                    mainRelativeLayout.setBackground(newDrawable);
+                } else {
+                    // set current wallpaper as background to layout
+                    WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
+                    Drawable currentWallPaper = wallpaperManager.getDrawable();
+                    mainRelativeLayout.setBackground(currentWallPaper);
+                }
             }
         });
-    }
-
-    protected void onDestroy() {
-        // Unregister
-        super.onDestroy();
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
     }
 
     public void onItemSelected(AdapterView<?> parent, View view,
@@ -311,7 +352,7 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
 
             long compare = Integer.valueOf(calInstanceMeetingEventStart.get(Calendar.HOUR_OF_DAY)).compareTo(calInstanceCurrent.get(Calendar.HOUR_OF_DAY));
 
-            if(compare == 0)//Means Both meeting time in hours is same hence compare minutes
+            if (compare == 0)//Means Both meeting time in hours is same hence compare minutes
             {
                 compare = Integer.valueOf(calInstanceMeetingEventStart.get(Calendar.MINUTE)).compareTo(calInstanceCurrent.get(Calendar.MINUTE));
             }
@@ -460,6 +501,13 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
             }
 
             return compare;
+        }
+    };
+
+    // sort calendar names alphabetically
+    static final Comparator<String> CALENDAR_NAME_ORDER = new Comparator<String>() {
+        public int compare(String e1, String e2) {
+            return e1.compareToIgnoreCase(e2);
         }
     };
 
