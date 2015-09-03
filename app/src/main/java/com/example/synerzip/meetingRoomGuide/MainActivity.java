@@ -5,6 +5,9 @@ import android.app.WallpaperManager;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.view.View;
 import android.widget.TextView;
@@ -32,6 +36,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +58,12 @@ import org.json.JSONObject;
 public class MainActivity extends ListActivity implements OnItemSelectedListener {
     boolean currentEventFoundFlag = false;
     String previousTitle = "";
+    String startTimeForReporting = "";
+    String endTimeForReporting = "";
+    String titleForReporting = "";
+    String mailBodyText = "";
+    String meetingRoomName = "";
+    String organizer = "";
 
 
     public class CalendarList {
@@ -73,6 +84,18 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button sendBtn = (Button) findViewById(R.id.sendEmail);
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                try {
+                    sendEmail();
+                } catch (NullPointerException e) {
+                    System.out.println("Gmail account is not configured on Device.");
+                } catch (Exception e) {
+                    System.out.println("Some exception Occurred.");
+                }
+            }
+        });
         // cache current relative layout
         mainRelativeLayout = findViewById(R.id.mainRelativeLayout);
 
@@ -155,6 +178,54 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         setListAdapter(calendarListAdapter);
     }
 
+    protected void sendEmail() {
+
+        //set the main intent to ACTION_SEND for looking for applications that share information
+        Intent intent = new Intent(Intent.ACTION_SEND, null);
+
+        //intent.addCategory(Intent.CATEGORY_LAUNCHER); //if you want extra filters
+
+        //filter out apps that are able to send plain text
+        intent.setType("plain/text");
+
+        //get a list of apps that meet your criteria above
+        List<ResolveInfo> pkgAppsList = this.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER);
+
+        ResolveInfo info = null;
+        if (!pkgAppsList.isEmpty()) {
+            for (ResolveInfo resolveInfo : pkgAppsList) {
+                String packageName = resolveInfo.activityInfo.packageName;
+
+                if (packageName.equals("com.google.android.gm")) { // Select Gmail
+                    info = resolveInfo;
+                }
+            }
+        }
+
+        String packageName = info.activityInfo.packageName;
+        String className = info.activityInfo.name;
+
+        //set the intent to launch that specific app
+        intent.setClassName(packageName, className);
+
+        //some samples on adding more then one email address
+        String aEmailList[] = { "tushar.bende@synerzip.com","bhushan.shitole@synerzip.com" };
+        //Put CC/BCC if any
+        // we can put organizer name in CC if requirement is like that
+        // String aEmailCCList[] = { "tushar.bende@synerzip.com","tushar.bende@synerzip.com"};
+        // String aEmailBCCList[] = { "tushar.bende@synerzip.com" };
+
+        //all the extras that will be passed to the email app
+        intent.putExtra(android.content.Intent.EXTRA_EMAIL, aEmailList);
+        // intent.putExtra(android.content.Intent.EXTRA_CC, aEmailCCList);
+        // intent.putExtra(android.content.Intent.EXTRA_BCC, aEmailBCCList);
+        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Meeting Room " + meetingRoomName + " NOT in use but booked.");
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, mailBodyText);
+
+        //start the app
+        startActivity(intent);
+
+    }
     class SetBingImageAsBackground extends TimerTask {
         public void run() {
 
@@ -254,7 +325,7 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         TextView calendarName = (TextView) findViewById(R.id.calendarName);
         calendarName.setText(selectedCalendarName);
 
-
+        meetingRoomName = selectedCalendarName;
         // Fetch and display selected calendar's events in list view
         calendarEventList = getDataForListView(MainActivity.this, selectedCalendarName);
         calendarListAdapter = new CalendarListAdapter();
@@ -346,6 +417,16 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
                 endDate.setTextColor(Color.WHITE);
                 toDash.setTextColor(Color.WHITE);
                 arg1.setBackgroundColor(arg1.getResources().getColor(R.color.material_deep_teal_500));
+                titleForReporting = chapter.title;
+
+                Date start = new Date(meetingStartTimeConvertedToTodayInMillis);
+                Date end = new Date(meetingEndTimeConvertedToTodayInMillis);
+                DateFormat formatter = new SimpleDateFormat("dd:MMM:yyyy:HH:mm:ss:a");
+                startTimeForReporting = formatter.format(start);
+                endTimeForReporting = formatter.format(end);
+                mailBodyText = "Hi Admin,\nMeeting room " + meetingRoomName + " is booked for meeting:- " + titleForReporting + "\nStart Time:- " +
+                        startTimeForReporting + " &" + " End time:- "+ endTimeForReporting +
+                        " but it is not in use\nPlease confirm with the organizer " + organizer;
                 currentEventFoundFlag = true;
             }
 
@@ -412,7 +493,7 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
             final String[] projection = new String[]
                     {CalendarContract.Events.TITLE, CalendarContract.Events.DTSTART,
                             CalendarContract.Events.DTEND, CalendarContract.Events.ACCOUNT_NAME,
-                            CalendarContract.Events.DURATION, CalendarContract.Events.ACCESS_LEVEL};
+                            CalendarContract.Events.DURATION, CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ORGANIZER};
 
             eventCursor = contentResolver.query(
                     builder.build(), projection, CalendarContract.Instances.CALENDAR_DISPLAY_NAME + " = ?",
@@ -428,6 +509,7 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
                 final String accountName = eventCursor.getString(3);
                 final String duration = eventCursor.getString(4);
                 final Long accessLevel = eventCursor.getLong(5);
+                organizer = eventCursor.getString(6);
 
 
                 if (duration != null) {

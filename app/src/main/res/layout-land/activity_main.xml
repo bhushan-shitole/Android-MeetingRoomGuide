@@ -40,5 +40,9 @@
         android:layout_below="@android:id/list"
         android:layout_alignEnd="@android:id/list"
         android:layout_alignStart="@android:id/list" />
+    <Button android:id="@+id/sendEmail" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:text="Report"
+        android:layout_alignBottom="@+id/calendarName"
+        android:layout_alignStart="@+id/calendarName"></Button>
 
 </RelativeLayout>
