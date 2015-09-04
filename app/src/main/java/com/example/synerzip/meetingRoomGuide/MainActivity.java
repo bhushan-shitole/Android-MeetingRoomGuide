@@ -85,6 +85,7 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         setContentView(R.layout.activity_main);
 
         Button sendBtn = (Button) findViewById(R.id.sendEmail);
+        sendBtn.setVisibility(View.GONE);
         sendBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 try {
@@ -410,7 +411,8 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
             long meetingStartTimeConvertedToTodayInMillis = calInstanceMeetingEventStart.getTimeInMillis();
             long meetingEndTimeConvertedToTodayInMillis = calInstanceMeetingEventEnd.getTimeInMillis();
 
-            // Set current meeting attributes (bg colour etc)
+            // Set current meeting attributes (bg colour etc).
+            // As It is a Current Ongoing meeting Enable the Complaint Button.
             if (meetingStartTimeConvertedToTodayInMillis < calInstanceCurrent.getTimeInMillis() && meetingEndTimeConvertedToTodayInMillis > calInstanceCurrent.getTimeInMillis()) {
                 title.setTextColor(Color.WHITE);
                 startDate.setTextColor(Color.WHITE);
@@ -428,6 +430,8 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
                         startTimeForReporting + " &" + " End time:- "+ endTimeForReporting +
                         " but it is not in use\nPlease confirm with the organizer " + organizer;
                 currentEventFoundFlag = true;
+                Button sendBtn = (Button) findViewById(R.id.sendEmail);
+                sendBtn.setVisibility(View.VISIBLE);
             }
 
 
@@ -443,6 +447,8 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
                 arg1.setBackgroundColor(arg1.getResources().getColor(R.color.material_deep_teal_500));
                 currentEventFoundFlag = true;// Highlighted the next event
                 previousTitle = chapter.title;
+                Button sendBtn = (Button) findViewById(R.id.sendEmail);
+                sendBtn.setVisibility(View.GONE);
             }
 
             title.setText(chapter.title);
