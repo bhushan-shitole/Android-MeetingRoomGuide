@@ -428,7 +428,7 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
                 endTimeForReporting = formatter.format(end);
                 mailBodyText = "Hi Admin,\nMeeting room " + meetingRoomName + " is booked for meeting:- " + titleForReporting + "\nStart Time:- " +
                         startTimeForReporting + " &" + " End time:- "+ endTimeForReporting +
-                        " but it is not in use\nPlease confirm with the organizer " + organizer;
+                        " but it is not in use\nPlease confirm with the organizer " + organizer + "\nThanks,\nMeeting Room Guide";
                 currentEventFoundFlag = true;
                 Button sendBtn = (Button) findViewById(R.id.sendEmail);
                 sendBtn.setVisibility(View.VISIBLE);
