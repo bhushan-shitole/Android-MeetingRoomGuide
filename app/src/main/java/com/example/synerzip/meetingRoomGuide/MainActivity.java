@@ -1,9 +1,11 @@
 package com.example.synerzip.meetingRoomGuide;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.app.WallpaperManager;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,6 +22,7 @@ import android.os.AsyncTask;
 import android.provider.CalendarContract;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.ViewGroup;
@@ -41,9 +44,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Comparator;
 import java.util.Calendar;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -51,6 +56,7 @@ import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.AdapterView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,14 +84,35 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
     List<CalendarList> calendarEventList;
     private static final String DATE_TIME_FORMAT = "h:mm a";
     Drawable newDrawable;
+    Map<String, String> calendarResources = new HashMap<String, String>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button quickBookBtn = (Button) findViewById(R.id.quickBook);
+        quickBookBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                TextView accountName = (TextView) findViewById(R.id.calendarName);
+
+                String emailList = calendarResources.get(accountName.getText().toString());
+
+                Calendar cal = Calendar.getInstance();
+                Intent intent = new Intent(Intent.ACTION_EDIT);
+                intent.setType("vnd.android.cursor.item/event");
+                intent.putExtra("beginTime", cal.getTimeInMillis());
+                intent.putExtra("allDay", false);
+                intent.putExtra("endTime", cal.getTimeInMillis() + 30 * 60 * 1000);
+                intent.putExtra("title", "QuickBooking from Meeting Room Guide");
+                intent.putExtra(Intent.EXTRA_EMAIL, emailList);
+                startActivity(intent);
+
+            }
+        });
+
         Button sendBtn = (Button) findViewById(R.id.sendEmail);
-        sendBtn.setVisibility(View.GONE);
         sendBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 try {
@@ -110,15 +137,29 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         timer.schedule(new SetBingImageAsBackground(), 0, DateUtils.DAY_IN_MILLIS);
 
         /********** Display all calendar names in drop down START ****************/
+
+          String[] EVENT_PROJECTION = new String[] {
+                CalendarContract.Calendars._ID,                           // 0
+                CalendarContract.Calendars.ACCOUNT_NAME,                  // 1
+                CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,         // 2
+                CalendarContract.Calendars.OWNER_ACCOUNT                  // 3
+        };
+
         ArrayList<String> calendarNames = new ArrayList<String>();
         ContentResolver contentResolver = this.getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://com.android.calendar/calendars"),
-                (new String[]{"name"}), null, null, "name ASC");
+                EVENT_PROJECTION, null, null, "name ASC");
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                String displayName = cursor.getString(0);
+                String displayName = cursor.getString(2);
+                String id = cursor.getString(0);
+                String ACCOUNT_NAME = cursor.getString(1);
+                String OWNER_ACCOUNT = cursor.getString(3);
 
+                calendarResources.put(displayName, OWNER_ACCOUNT);
+
+System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_NAME = " + ACCOUNT_NAME + " OWNER_ACCOUNT = " + OWNER_ACCOUNT);
                 // Filter primary account's calender
 //                if (displayName.contains("@")) {
 //                    continue;
@@ -210,10 +251,10 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         intent.setClassName(packageName, className);
 
         //some samples on adding more then one email address
-        String aEmailList[] = { "tushar.bende@synerzip.com","bhushan.shitole@synerzip.com" };
+        String aEmailList[] = { "rajesh.dhopate@synerzip.com" }; // provide admin's email id
         //Put CC/BCC if any
         // we can put organizer name in CC if requirement is like that
-        // String aEmailCCList[] = { "tushar.bende@synerzip.com","tushar.bende@synerzip.com"};
+        // String aEmailCCList[] = { "tushar.bende@synerzip.com","bhushan.shitole@synerzip.com"};
         // String aEmailBCCList[] = { "tushar.bende@synerzip.com" };
 
         //all the extras that will be passed to the email app

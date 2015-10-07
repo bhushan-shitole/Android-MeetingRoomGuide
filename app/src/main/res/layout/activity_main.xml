@@ -41,12 +41,21 @@
         android:layout_alignEnd="@android:id/list"
         android:layout_alignStart="@android:id/list" />
 
-    <!--<RelativeLayout android:id="@+id/RelativeLayout01"-->
-        <!--android:layout_width="fill_parent" android:layout_height="wrap_content">-->
-        <Button android:id="@+id/sendEmail" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="Complaint"
-            android:layout_alignBottom="@+id/calendarName"
-            android:layout_alignStart="@+id/calendarName"></Button>
-    <!--</RelativeLayout>-->
+    <Button
+        android:id="@+id/sendEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Complaint"
+        android:layout_alignStart="@android:id/list"
+        android:layout_below="@+id/calendarName" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quick Book"
+        android:id="@+id/quickBook"
+        android:layout_alignTop="@android:id/list"
+        android:layout_toStartOf="@android:id/list" />
+
 
 </RelativeLayout>
