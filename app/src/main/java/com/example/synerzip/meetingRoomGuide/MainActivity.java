@@ -91,7 +91,8 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Button sendBtn = (Button) findViewById(R.id.sendEmail);
+        sendBtn.setVisibility(View.GONE);
         Button quickBookBtn = (Button) findViewById(R.id.quickBook);
         quickBookBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -112,7 +113,6 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
             }
         });
 
-        Button sendBtn = (Button) findViewById(R.id.sendEmail);
         sendBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 try {
@@ -475,7 +475,6 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                 sendBtn.setVisibility(View.VISIBLE);
             }
 
-
             long compare = Integer.valueOf(calInstanceMeetingEventStart.get(Calendar.HOUR_OF_DAY)).compareTo(calInstanceCurrent.get(Calendar.HOUR_OF_DAY));
 
             if (compare == 0)//Means Both meeting time in hours is same hence compare minutes
@@ -523,6 +522,9 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
         List<CalendarList> calendarData = new ArrayList<CalendarList>();
         Cursor eventCursor = null;
         Cursor cursor = null;
+        // while loading every calender we need to set Complaint button as Disabled as initial state.
+        Button sendBtn = (Button) findViewById(R.id.sendEmail);
+        sendBtn.setVisibility(View.GONE);
 
         try {
             // Fetch all events of selected calendar
