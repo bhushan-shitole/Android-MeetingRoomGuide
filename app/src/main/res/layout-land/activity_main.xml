@@ -11,7 +11,7 @@
         android:layout_height="350dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="150dp"
+        android:layout_marginRight="160dp"
         android:background="@color/highlighted_text_material_dark"
         android:divider="@drawable/abc_list_divider_mtrl_alpha"
         android:dividerHeight="1dp"
@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_alignEnd="@android:id/list"
         android:layout_marginLeft="50dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="30dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/abc_primary_text_disable_only_material_dark"
         android:textSize="30sp"
@@ -57,15 +57,18 @@
         android:layout_marginTop="87dp"
         android:layout_toEndOf="@+id/calendarName"
         android:background="#9E9E9E"
-        android:text="Complaint"></Button>
+        android:text="Complaint"
+        android:drawableStart="@drawable/complaint_icon"></Button>
 
     <Button
         android:id="@+id/quickBook"
+        android:layout_marginTop="0dp"
+        android:layout_height="80dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignTop="@android:id/list"
         android:layout_toStartOf="@android:id/list"
         android:background="#9E9E9E"
-        android:text="@string/quick_book" />
+        android:text="@string/quick_book"
+        android:drawableStart="@drawable/quickbook"/>
 
 </RelativeLayout>

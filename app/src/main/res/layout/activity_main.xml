@@ -55,7 +55,8 @@
         android:text="Quick Book"
         android:id="@+id/quickBook"
         android:layout_alignTop="@android:id/list"
-        android:layout_toStartOf="@android:id/list" />
+        android:layout_toStartOf="@android:id/list"
+        />
 
 
 </RelativeLayout>

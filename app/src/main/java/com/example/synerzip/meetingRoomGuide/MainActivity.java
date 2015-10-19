@@ -542,7 +542,8 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
             final String[] projection = new String[]
                     {CalendarContract.Events.TITLE, CalendarContract.Events.DTSTART,
                             CalendarContract.Events.DTEND, CalendarContract.Events.ACCOUNT_NAME,
-                            CalendarContract.Events.DURATION, CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ORGANIZER};
+                            CalendarContract.Events.DURATION, CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ORGANIZER,
+                            CalendarContract.Events.SELF_ATTENDEE_STATUS};
 
             eventCursor = contentResolver.query(
                     builder.build(), projection, CalendarContract.Instances.CALENDAR_DISPLAY_NAME + " = ?",
@@ -559,7 +560,12 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                 final String duration = eventCursor.getString(4);
                 final Long accessLevel = eventCursor.getLong(5);
                 organizer = eventCursor.getString(6);
+                final String selfAttendeeStatus = eventCursor.getString(7);
 
+                // Check to hide declined events by Meeting room
+                if (selfAttendeeStatus.equals("2")) {
+                    continue;
+                }
 
                 if (duration != null) {
                     // Calculation Logic for Meeting end time
