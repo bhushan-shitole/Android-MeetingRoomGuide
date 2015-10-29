@@ -11,12 +11,12 @@
         android:layout_height="350dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="160dp"
+        android:layout_marginRight="50dp"
         android:background="@color/highlighted_text_material_dark"
         android:divider="@drawable/abc_list_divider_mtrl_alpha"
         android:dividerHeight="1dp"
         android:fastScrollStyle="@color/primary_dark_material_dark"
-        android:outlineProvider="bounds"></ListView>
+        android:outlineProvider="bounds"/>
 
 
     <TextView
@@ -49,26 +49,28 @@
     <!--android:layout_below="@+id/calendarName" />-->
 
 
-    <Button
-        android:id="@+id/sendEmail"
-        android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="87dp"
-        android:layout_toEndOf="@+id/calendarName"
-        android:background="#9E9E9E"
-        android:text="Complaint"
-        android:drawableStart="@drawable/complaint_icon"></Button>
-
-    <Button
+    <ImageButton
         android:id="@+id/quickBook"
-        android:layout_marginTop="0dp"
-        android:layout_height="80dp"
         android:layout_width="wrap_content"
-        android:layout_alignTop="@android:id/list"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="180dp"
         android:layout_toStartOf="@android:id/list"
         android:background="#9E9E9E"
-        android:text="@string/quick_book"
-        android:drawableStart="@drawable/quickbook"/>
+        android:src="@drawable/quickbookbutton"
+        />
+
+    <ImageButton
+        android:id="@+id/sendEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_alignTop="@android:id/list"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toStartOf="@android:id/list"
+        android:background="#9E9E9E"
+        android:src="@drawable/complaintbutton"/>
+
 
 </RelativeLayout>

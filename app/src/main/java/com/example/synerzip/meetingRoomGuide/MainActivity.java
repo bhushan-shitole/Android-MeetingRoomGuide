@@ -28,6 +28,7 @@ import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.view.View;
 import android.widget.TextView;
@@ -77,6 +78,7 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         String title;
         Date start;
         Date end;
+        String organizer;
     }
 
     View mainRelativeLayout;
@@ -91,9 +93,9 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button sendBtn = (Button) findViewById(R.id.sendEmail);
+        ImageButton sendBtn = (ImageButton) findViewById(R.id.sendEmail);
         sendBtn.setVisibility(View.GONE);
-        Button quickBookBtn = (Button) findViewById(R.id.quickBook);
+        ImageButton quickBookBtn = (ImageButton) findViewById(R.id.quickBook);
         quickBookBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 TextView accountName = (TextView) findViewById(R.id.calendarName);
@@ -461,6 +463,7 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                 toDash.setTextColor(Color.WHITE);
                 arg1.setBackgroundColor(arg1.getResources().getColor(R.color.material_deep_teal_500));
                 titleForReporting = chapter.title;
+                organizer = chapter.organizer;
 
                 Date start = new Date(meetingStartTimeConvertedToTodayInMillis);
                 Date end = new Date(meetingEndTimeConvertedToTodayInMillis);
@@ -471,7 +474,7 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                         startTimeForReporting + " &" + " End time:- "+ endTimeForReporting +
                         " but it is not in use\nPlease confirm with the organizer " + organizer + "\nThanks,\nMeeting Room Guide";
                 currentEventFoundFlag = true;
-                Button sendBtn = (Button) findViewById(R.id.sendEmail);
+                ImageButton sendBtn = (ImageButton) findViewById(R.id.sendEmail);
                 sendBtn.setVisibility(View.VISIBLE);
             }
 
@@ -487,7 +490,7 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                 arg1.setBackgroundColor(arg1.getResources().getColor(R.color.material_deep_teal_500));
                 currentEventFoundFlag = true;// Highlighted the next event
                 previousTitle = chapter.title;
-                Button sendBtn = (Button) findViewById(R.id.sendEmail);
+                ImageButton sendBtn = (ImageButton) findViewById(R.id.sendEmail);
                 sendBtn.setVisibility(View.GONE);
             }
 
@@ -517,13 +520,13 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
     }
 
     public List readCalendar(Context context, String calendarName) {
-
+        organizer = "";
         ContentResolver contentResolver = context.getContentResolver();
         List<CalendarList> calendarData = new ArrayList<CalendarList>();
         Cursor eventCursor = null;
         Cursor cursor = null;
         // while loading every calender we need to set Complaint button as Disabled as initial state.
-        Button sendBtn = (Button) findViewById(R.id.sendEmail);
+        ImageButton sendBtn = (ImageButton) findViewById(R.id.sendEmail);
         sendBtn.setVisibility(View.GONE);
 
         try {
@@ -559,13 +562,18 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                 final String accountName = eventCursor.getString(3);
                 final String duration = eventCursor.getString(4);
                 final Long accessLevel = eventCursor.getLong(5);
-                organizer = eventCursor.getString(6);
+
                 final String selfAttendeeStatus = eventCursor.getString(7);
 
                 // Check to hide declined events by Meeting room
                 if (selfAttendeeStatus.equals("2")) {
                     continue;
                 }
+
+//                if(organizer.isEmpty())
+//                {
+                    organizer = eventCursor.getString(6);
+//                }
 
                 if (duration != null) {
                     // Calculation Logic for Meeting end time
@@ -593,6 +601,7 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                 record.start = begin;
                 record.end = end;
                 record.calendarName = accountName;
+                record.organizer = organizer;
 
                 calendarData.add(record);
             } while (eventCursor.moveToNext());
