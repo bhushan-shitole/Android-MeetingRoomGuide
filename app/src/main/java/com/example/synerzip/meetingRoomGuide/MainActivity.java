@@ -135,8 +135,9 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
         mainRelativeLayout.setBackground(currentWallPaper);
 
         // Get Bing image and set as background every day
+        // (Changing it to Hour as Many devices' network gets timed out after long inactive time.)
         Timer timer = new Timer();
-        timer.schedule(new SetBingImageAsBackground(), 0, DateUtils.DAY_IN_MILLIS);
+        timer.schedule(new SetBingImageAsBackground(), 0, DateUtils.HOUR_IN_MILLIS);
 
         /********** Display all calendar names in drop down START ****************/
 
