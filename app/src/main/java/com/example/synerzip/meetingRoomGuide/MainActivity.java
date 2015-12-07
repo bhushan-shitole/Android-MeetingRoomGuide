@@ -87,6 +87,7 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
     private static final String DATE_TIME_FORMAT = "h:mm a";
     Drawable newDrawable;
     Map<String, String> calendarResources = new HashMap<String, String>();
+    Map<String, String> meetingRoomNames = new HashMap<String, String>();
 
 
     @Override
@@ -150,15 +151,20 @@ public class MainActivity extends ListActivity implements OnItemSelectedListener
 
         ArrayList<String> calendarNames = new ArrayList<String>();
         ContentResolver contentResolver = this.getContentResolver();
-        Cursor cursor = contentResolver.query(Uri.parse("content://com.android.calendar/calendars"),
-                EVENT_PROJECTION, null, null, "name ASC");
+        Cursor cursorThirdFloor = contentResolver.query(Uri.parse("content://com.android.calendar/calendars"),
+                EVENT_PROJECTION, "calendar_displayName LIKE '%3F%'", null, "name ASC");
+        Cursor cursorFourthFloor = contentResolver.query(Uri.parse("content://com.android.calendar/calendars"),
+                EVENT_PROJECTION, "calendar_displayName LIKE '%4F%'", null, "name ASC");
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                String displayName = cursor.getString(2);
-                String id = cursor.getString(0);
-                String ACCOUNT_NAME = cursor.getString(1);
-                String OWNER_ACCOUNT = cursor.getString(3);
+        if (cursorThirdFloor != null) {
+            while (cursorThirdFloor.moveToNext()) {
+                String displayNameOld = cursorThirdFloor.getString(2);
+                String displayName = displayNameOld.replace("3F", "");// Needs to update this logic for some other pattern
+                displayName = "3F -" + displayName;
+                meetingRoomNames.put(displayName, displayNameOld);
+                String id = cursorThirdFloor.getString(0);
+                String ACCOUNT_NAME = cursorThirdFloor.getString(1);
+                String OWNER_ACCOUNT = cursorThirdFloor.getString(3);
 
                 calendarResources.put(displayName, OWNER_ACCOUNT);
 
@@ -169,11 +175,41 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
 //                }
                 calendarNames.add(displayName);
             }
-            cursor.close();
+            cursorThirdFloor.close();
 
             // To sort with case sensitive uncomment below
 //            Collections.sort(calendarNames, CALENDAR_NAME_ORDER);
         }
+
+
+        if (cursorFourthFloor != null) {
+            while (cursorFourthFloor.moveToNext()) {
+                String displayNameOld = cursorFourthFloor.getString(2);
+                String displayName = displayNameOld.replace("4F", "");// Needs to update this logic for some other pattern
+                displayName = "4F -" + displayName;
+                meetingRoomNames.put(displayName, displayNameOld);
+                String id = cursorFourthFloor.getString(0);
+                String ACCOUNT_NAME = cursorFourthFloor.getString(1);
+                String OWNER_ACCOUNT = cursorFourthFloor.getString(3);
+
+                calendarResources.put(displayName, OWNER_ACCOUNT);
+
+                System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_NAME = " + ACCOUNT_NAME + " OWNER_ACCOUNT = " + OWNER_ACCOUNT);
+                // Filter primary account's calender
+//                if (displayName.contains("@")) {
+//                    continue;
+//                }
+                calendarNames.add(displayName);
+            }
+            cursorFourthFloor.close();
+
+            // To sort with case sensitive uncomment below
+//            Collections.sort(calendarNames, CALENDAR_NAME_ORDER);
+        }
+
+
+
+
 
         // drop down adapter
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
@@ -218,7 +254,7 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                 "DroidSans.ttf"));
 
         // Display first calender's events in list view
-        calendarEventList = getDataForListView(MainActivity.this, calendarNames.get(0));
+        calendarEventList = getDataForListView(MainActivity.this, meetingRoomNames.get(calendarNames.get(0)).toString());
         calendarListAdapter = new CalendarListAdapter();
         setListAdapter(calendarListAdapter);
     }
@@ -372,7 +408,7 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
 
         meetingRoomName = selectedCalendarName;
         // Fetch and display selected calendar's events in list view
-        calendarEventList = getDataForListView(MainActivity.this, selectedCalendarName);
+        calendarEventList = getDataForListView(MainActivity.this, meetingRoomNames.get(selectedCalendarName));
         calendarListAdapter = new CalendarListAdapter();
         setListAdapter(calendarListAdapter);
     }
@@ -525,7 +561,7 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
         ContentResolver contentResolver = context.getContentResolver();
         List<CalendarList> calendarData = new ArrayList<CalendarList>();
         Cursor eventCursor = null;
-        Cursor cursor = null;
+        Cursor cursorThirdFloor = null;
         // while loading every calender we need to set Complaint button as Disabled as initial state.
         ImageButton sendBtn = (ImageButton) findViewById(R.id.sendEmail);
         sendBtn.setVisibility(View.GONE);
@@ -617,8 +653,8 @@ System.out.println("calendar name = " + displayName + " id = " + id + " ACCOUNT_
                     eventCursor.close();
                 }
 
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
+                if (cursorThirdFloor != null && !cursorThirdFloor.isClosed()) {
+                    cursorThirdFloor.close();
                 }
 
             } catch (Exception ex) {
